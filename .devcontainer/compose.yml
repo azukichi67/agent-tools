@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace:cached
+      - app-node-modules:/workspaces/app/node_modules
+    command: sleep infinity
+    ports:
+      - "3000:3000"
+
+volumes:
+  app-node-modules:
