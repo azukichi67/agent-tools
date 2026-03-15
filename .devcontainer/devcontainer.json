@@ -11,7 +11,10 @@
         "Prisma.prisma",
         "bradlc.vscode-tailwindcss",
         "anthropic.claude-code"
-      ]
+      ],
+      "settings": {
+        "js/ts.tsserver.experimental.enableProjectDiagnostics": true
+      }
     }
   }
 }
