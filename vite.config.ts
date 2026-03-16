@@ -8,13 +8,15 @@ import viteReact from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const config = defineConfig({
 	server: {
 		host: true,
 	},
 	plugins: [
 		devtools(),
-		cloudflare({ viteEnvironment: { name: "ssr" } }),
+		!isDev && cloudflare({ viteEnvironment: { name: "ssr" } }),
 		tsconfigPaths({ projects: ["./tsconfig.json"] }),
 		tailwindcss(),
 		tanstackStart(),

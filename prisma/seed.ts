@@ -17,9 +17,9 @@ async function main() {
   // Create example todos
   const todos = await prisma.todo.createMany({
     data: [
-      { title: 'Buy groceries' },
-      { title: 'Read a book' },
-      { title: 'Workout' },
+      { title: 'Buy groceries', description: 'Milk, eggs, bread, and coffee' },
+      { title: 'Read a book', completed: true },
+      { title: 'Workout', description: 'Morning run and stretching' },
     ],
   })
 
