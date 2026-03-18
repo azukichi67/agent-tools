@@ -10,9 +10,9 @@ interface TodoListProps {
 }
 
 const FILTERS = [
-	{ key: "all", label: "All" },
-	{ key: "active", label: "Active" },
-	{ key: "completed", label: "Completed" },
+	{ key: "all", label: "すべて" },
+	{ key: "active", label: "未完了" },
+	{ key: "completed", label: "完了済み" },
 ] as const;
 
 export default function TodoList({
@@ -26,7 +26,7 @@ export default function TodoList({
 		<div>
 			<div className="mb-4 flex items-center justify-between">
 				<p className="text-sm text-(--sea-ink-soft)">
-					{todos.length} {todos.length === 1 ? "item" : "items"}
+					{todos.length}件
 				</p>
 				<div className="flex gap-1 rounded-lg bg-(--surface-strong) p-1">
 					{FILTERS.map(({ key, label }) => (
@@ -49,8 +49,10 @@ export default function TodoList({
 			{todos.length === 0 ? (
 				<p className="py-8 text-center text-sm text-(--sea-ink-soft)">
 					{filter === "all"
-						? "No todos yet. Add one above!"
-						: `No ${filter} todos.`}
+						? "アイテムはありません"
+						: filter === "active"
+							? "未完了のTODOはありません"
+							: "完了済みのTODOはありません"}
 				</p>
 			) : (
 				<ul className="flex flex-col gap-2">

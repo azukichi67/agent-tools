@@ -16,5 +16,8 @@
         "js/ts.tsserver.experimental.enableProjectDiagnostics": true
       }
     }
+  },
+  "features": {
+    "ghcr.io/GeorgOfenbeck/features/lazygit-linuxbinary:1": {}
   }
 }

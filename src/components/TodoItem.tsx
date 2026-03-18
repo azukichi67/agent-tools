@@ -25,7 +25,7 @@ export default function TodoItem({
 						? "border-(--lagoon) bg-(--lagoon) text-white"
 						: "border-(--line) hover:border-(--lagoon)"
 				}`}
-				aria-label={completed ? "Mark as incomplete" : "Mark as complete"}
+				aria-label={completed ? "未完了に戻す" : "完了にする"}
 			>
 				{completed && (
 					<svg
@@ -37,7 +37,7 @@ export default function TodoItem({
 						aria-hidden="true"
 						role="img"
 					>
-						<title>Checkmark</title>
+						<title>チェックマーク</title>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -63,7 +63,7 @@ export default function TodoItem({
 				type="button"
 				onClick={() => onDelete(id)}
 				className="shrink-0 rounded-md p-1 text-(--sea-ink-soft)/50 transition hover:bg-red-100 hover:text-red-500"
-				aria-label="Delete todo"
+				aria-label="TODOを削除"
 			>
 				<svg
 					className="h-4 w-4"
@@ -74,7 +74,7 @@ export default function TodoItem({
 					aria-hidden="true"
 					role="img"
 				>
-					<title>Delete</title>
+					<title>削除</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"

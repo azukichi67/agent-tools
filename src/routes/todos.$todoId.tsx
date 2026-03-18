@@ -51,13 +51,13 @@ function TodoDetailPage() {
 		return (
 			<main className="page-wrap mx-auto max-w-2xl px-4 pb-8 pt-14">
 				<p className="text-center text-(--sea-ink-soft)">
-					Todo not found.
+					TODOが見つかりません
 				</p>
 				<Link
 					to="/"
 					className="mt-4 block text-center text-sm text-(--lagoon)"
 				>
-					Back to list
+					一覧に戻る
 				</Link>
 			</main>
 		);
@@ -69,7 +69,7 @@ function TodoDetailPage() {
 				to="/"
 				className="mb-6 inline-flex items-center gap-1 text-sm text-(--lagoon) no-underline hover:underline"
 			>
-				&larr; Back to list
+				&larr; 一覧に戻る
 			</Link>
 
 			<section className="island-shell rise-in rounded-2xl px-6 py-8 sm:px-10">
@@ -89,7 +89,7 @@ function TodoDetailPage() {
 								htmlFor="title"
 								className="mb-1 block text-xs font-medium text-(--sea-ink-soft)"
 							>
-								Title
+								タイトル
 							</label>
 							<input
 								id="title"
@@ -104,7 +104,7 @@ function TodoDetailPage() {
 								htmlFor="description"
 								className="mb-1 block text-xs font-medium text-(--sea-ink-soft)"
 							>
-								Description
+								説明
 							</label>
 							<textarea
 								id="description"
@@ -120,7 +120,7 @@ function TodoDetailPage() {
 								disabled={!title.trim()}
 								className="rounded-lg bg-(--lagoon) px-5 py-2 text-sm font-semibold text-white transition hover:bg-(--lagoon-deep) disabled:opacity-40"
 							>
-								Save
+								保存
 							</button>
 							<button
 								type="button"
@@ -131,7 +131,7 @@ function TodoDetailPage() {
 								}}
 								className="rounded-lg border border-(--line) px-5 py-2 text-sm text-(--sea-ink-soft) transition hover:bg-(--surface-strong)"
 							>
-								Cancel
+								キャンセル
 							</button>
 						</div>
 					</form>
@@ -154,7 +154,7 @@ function TodoDetailPage() {
 										: "bg-(--surface-strong) text-(--sea-ink-soft)"
 								}`}
 							>
-								{todo.completed ? "Completed" : "Active"}
+								{todo.completed ? "完了済み" : "未完了"}
 							</span>
 						</div>
 
@@ -165,7 +165,7 @@ function TodoDetailPage() {
 						)}
 
 						<p className="mb-6 text-xs text-(--sea-ink-soft)/60">
-							Created {new Date(todo.createdAt).toLocaleDateString("ja-JP")}
+							作成日: {new Date(todo.createdAt).toLocaleDateString("ja-JP")}
 						</p>
 
 						<div className="flex flex-wrap gap-2">
@@ -178,21 +178,21 @@ function TodoDetailPage() {
 								}
 								className="rounded-lg border border-(--line) px-4 py-2 text-sm transition hover:bg-(--surface-strong)"
 							>
-								{todo.completed ? "Mark as active" : "Mark as completed"}
+								{todo.completed ? "未完了に戻す" : "完了にする"}
 							</button>
 							<button
 								type="button"
 								onClick={() => setIsEditing(true)}
 								className="rounded-lg border border-(--line) px-4 py-2 text-sm transition hover:bg-(--surface-strong)"
 							>
-								Edit
+								編集
 							</button>
 							<button
 								type="button"
 								onClick={() => deleteMutation.mutate()}
 								className="rounded-lg border border-red-200 px-4 py-2 text-sm text-red-500 transition hover:bg-red-50"
 							>
-								Delete
+								削除
 							</button>
 						</div>
 					</div>

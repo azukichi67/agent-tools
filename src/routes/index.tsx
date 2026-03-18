@@ -44,9 +44,8 @@ function TodoPage() {
 	return (
 		<main className="page-wrap mx-auto max-w-2xl px-4 pb-8 pt-14">
 			<section className="island-shell rise-in rounded-4xl px-6 py-10 sm:px-10 sm:py-14">
-				<p className="island-kicker mb-3">Todo App</p>
 				<h1 className="display-title mb-6 text-3xl font-bold tracking-tight text-(--sea-ink)">
-					What's on your list?
+					サンプルTODO
 				</h1>
 
 				<TodoForm onSubmit={(title) => addMutation.mutate(title)} />

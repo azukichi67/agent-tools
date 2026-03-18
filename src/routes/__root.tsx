@@ -1,15 +1,9 @@
-import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import {
 	createRootRouteWithContext,
 	HeadContent,
 	Scripts,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-
-import TanStackQueryDevtools from "../integrations/tanstack-query/devtools";
 import TanStackQueryProvider from "../integrations/tanstack-query/root-provider";
 import appCss from "../styles.css?url";
 
@@ -45,7 +39,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
 	return (
-		<html lang="en" suppressHydrationWarning>
+		<html lang="ja" suppressHydrationWarning>
 			<head>
 				{/* biome-ignore lint/security/noDangerouslySetInnerHtml: theme init script is trusted static content */}
 				<script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
@@ -53,10 +47,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<TanStackQueryProvider>
-					<Header />
 					{children}
-					<Footer />
-					<TanStackDevtools
+					{/* <TanStackDevtools
 						config={{
 							position: "bottom-right",
 						}}
@@ -67,7 +59,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 							},
 							TanStackQueryDevtools,
 						]}
-					/>
+					/> */}
 				</TanStackQueryProvider>
 				<Scripts />
 			</body>
