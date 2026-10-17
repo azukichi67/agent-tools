@@ -1,0 +1,11 @@
+Port 22
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+AllowUsers dev
+# dev はパスワード未設定でロック状態になるため、PAMのアカウントチェックを切る
+UsePAM no
+# Windows ホストからのbind mountはパーミッションが崩れやすいため緩める。
+# ローカル開発専用コンテナの前提で許容している。
+StrictModes no
+Subsystem sftp /usr/lib/openssh/sftp-server
