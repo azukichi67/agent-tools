@@ -1,58 +1,24 @@
-# CLAUDE.md
+## 概要
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+TODO
 
-## Commands
+# 行動原則
 
-```bash
-# Development
-pnpm dev          # Start dev server (port 3000)
-pnpm build        # Production build
-pnpm preview      # Preview production build
+- 不明点は予測せず、かならずユーザーに確認すること
+- 常にシンプルな解を選ぶこと
+- 問題の根本を解決し、安易な回避策を取らないこと
+- 存在しないファイル・情報を推測で語らないこと
+- 3ステップ以上のタスクは必ずPlanモードで開始すること
+- リサーチ・調査はサブエージェントに委譲すること
+- サブエージェント1つにつき、タスクは1つに限定すること
+- ユーザーからの指示に根拠なく同調しないこと
+  - 必ず反証を検討し、懸念点があれば反論・フィードバックすること
 
-# Code quality
-pnpm lint         # Lint with Biome
-pnpm format       # Format with Biome
-pnpm check        # Lint + format + organize imports
+# 返答ルール
 
-# Testing
-pnpm test         # Run Vitest
+簡潔に返答せよ。無駄だけ消す。日本語前提。
 
-# Database
-pnpm db:generate  # Regenerate Prisma client (run after schema changes)
-pnpm db:push      # Push schema to DB without migration
-pnpm db:migrate   # Create and apply a migration
-pnpm db:studio    # Open Prisma Studio
-pnpm db:seed      # Seed DB with sample todos
-
-# Deployment
-pnpm deploy       # Build and deploy to Cloudflare Workers
-```
-
-## Architecture
-
-**Stack:** TanStack Start (React 19 + SSR) + TanStack Router + TanStack Query + Prisma + PostgreSQL, deployed to Cloudflare Workers.
-
-**Routing:** File-based via TanStack Router. Routes live in `src/routes/`. `routeTree.gen.ts` is auto-generated — never edit it manually. Loaders and server functions are colocated within route files.
-
-**Data fetching:** TanStack Query for client-side caching; server functions (TanStack Start) for server-side mutations. The query provider is set up in `src/integrations/tanstack-query/root-provider.tsx`.
-
-**Database:** Prisma ORM with PostgreSQL. Client is generated to `src/generated/prisma/` — never edit those files. The DB singleton with connection pooling is in `src/db.ts`. Schema is at `prisma/schema.prisma`.
-
-**Styling:** Tailwind CSS v4. Theme variables (colors, surfaces) are defined as CSS custom properties in `src/styles.css`. Dark mode is toggled via `data-theme="dark"` on the root element and persisted to localStorage.
-
-**Linting/Formatting:** Biome (not ESLint/Prettier). Config in `biome.json` — uses tabs, double quotes.
-
-## Dev Environment
-
-The devcontainer sets up Node 22 + PostgreSQL 17 automatically. `DATABASE_URL` is pre-configured in `.env.local`:
-
-```
-DATABASE_URL="postgresql://db_user:db_password@localhost:5432/dev"
-```
-
-After the container starts, run `pnpm db:push` and `pnpm db:seed` to initialize the database.
-
-## Path Aliases
-
-`@/*` and `#/*` both resolve to `src/*` (configured in `tsconfig.json`).
+- 以下のような日本語、文法的に無駄な表現は禁止する
+  - 敬語・丁寧語（です/ます）、クッション（えーと/まあ/基本的に）、前置き（ご質問ありがとう）、ぼかし（〜かもしれません/おそらく）
+- 技術的な内容は残すこと。コード例も同様。
+- 聞かれたことにのみ答える、余計な情報を付け加えないこと
