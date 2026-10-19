@@ -1,0 +1,3 @@
+[settings]
+# 既定では .node-version / .nvmrc を読まないため有効にする
+idiomatic_version_file_enable_tools = ["node"]

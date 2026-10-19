@@ -1,0 +1,22 @@
+services:
+  dev:
+    build: ./docker
+    init: true
+    restart: unless-stopped
+    ports:
+      # LAN から届かないよう localhost にだけ公開する
+      - "127.0.0.1:${SSH_PORT:-2222}:22"
+    volumes:
+      - home:/home/dev
+      - workspace:/workspace
+      # ホストキーが変わると Orca が接続を拒否するため、作り直しても残す
+      - ssh-host-keys:/etc/ssh/host-keys
+      - ${SSH_PUBLIC_KEY_PATH:-~/.ssh/id_ed25519.pub}:/etc/ssh/host-public-key:ro
+      # 汎用スキルとルールを全プロジェクトに効かせる。編集はホスト側で行う
+      - ${AGENT_TOOLS_DIR:-.}/.claude/skills:/home/dev/.claude/skills:ro
+      - ${AGENT_TOOLS_DIR:-.}/.claude/rules:/home/dev/.claude/rules:ro
+
+volumes:
+  home:
+  workspace:
+  ssh-host-keys:
