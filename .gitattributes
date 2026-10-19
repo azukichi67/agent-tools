@@ -1,0 +1,2 @@
+# コンテナ内で実行するファイルは autocrlf で CRLF にされると動かない
+docker/** text eol=lf

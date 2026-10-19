@@ -1,0 +1,16 @@
+Port 22
+HostKey /etc/ssh/host-keys/ssh_host_ed25519_key
+
+PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+AllowUsers dev
+
+# 非対話のセッション（ssh host 'cmd'）は profile を読まないため、ここで mise と claude を PATH に入れる
+SetEnv PATH=/home/dev/.local/share/mise/shims:/home/dev/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+# Orca の managed server と Ports タブがポートフォワードを使う
+AllowTcpForwarding yes
+
+Subsystem sftp internal-sftp
