@@ -2,6 +2,7 @@ set dotenv-load
 set windows-shell := ["powershell.exe", "-NoLogo", "-Command"]
 
 port := env_var_or_default("SSH_PORT", "2222")
+forward_ports := env_var_or_default("FORWARD_PORTS", "3000 3001 8000 5555")
 
 default:
     @just --list
@@ -21,6 +22,10 @@ restart:
 # SSH で入る
 shell:
     ssh -p {{port}} dev@localhost
+
+# コンテナ内のポートを手元の同じ番号に転送する。Ctrl+C で止める
+forward:
+    ssh -p {{port}} -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 {{replace_regex(forward_ports, '(\d+)', '-L ${1}:localhost:${1}')}} dev@localhost
 
 # ログを追う
 logs:
