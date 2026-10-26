@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  --bg:#fff; --fg:#14161a; --muted:#5c6470; --line:#d5dae0; --card:#fff; --panel:#f6f7f9; --accent:#2f6feb;
+  --edge:#8a94a3; --tag-bg:#eceff3;
+  --g0:#2f6feb; --g1:#2f9a55; --g2:#c98418; --g3:#d0453f; --g4:#8255d0; --g5:#16929f; --g6:#bd4f97; --g7:#6f7f2c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#14161a; --fg:#e7eaee; --muted:#9aa4b2; --line:#343a44; --card:#1a1d23; --panel:#181b20; --accent:#6ea3ff;
+    --edge:#6c7684; --tag-bg:#262b33;
+    --g0:#6ea3ff; --g1:#57b878; --g2:#e0a542; --g3:#e5716c; --g4:#a685e8; --g5:#43b6c2; --g6:#d97bb7; --g7:#a3b25a;
+  }
+}
+.c0{--c:var(--g0)} .c1{--c:var(--g1)} .c2{--c:var(--g2)} .c3{--c:var(--g3)}
+.c4{--c:var(--g4)} .c5{--c:var(--g5)} .c6{--c:var(--g6)} .c7{--c:var(--g7)}
+
+* { box-sizing:border-box; }
+html, body { height:100%; margin:0; }
+body { display:grid; grid-template-rows:auto 1fr; grid-template-columns:minmax(0,1fr); background:var(--bg); color:var(--fg); font-size:14px; line-height:1.6;
+  font-family:"Hiragino Sans","Noto Sans JP",-apple-system,BlinkMacSystemFont,sans-serif; }
+button { font:inherit; color:inherit; }
+.eyebrow { font-size:11px; letter-spacing:.16em; color:var(--muted); font-weight:700; }
+.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+
+/* 上部のバー */
+header.bar { display:flex; align-items:center; gap:10px 16px; flex-wrap:wrap; padding:10px 16px; border-bottom:1px solid var(--line); }
+header.bar h1 { font-size:18px; margin:0; }
+header.bar .desc { color:var(--muted); font-size:12.5px; }
+header.bar .stat { background:var(--tag-bg); border-radius:6px; padding:2px 9px; font-size:12px; color:var(--muted); }
+header.bar .tools { margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+#search { width:220px; max-width:100%; padding:5px 9px; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--fg); font:inherit; }
+.btn { border:1px solid var(--line); background:var(--card); border-radius:6px; padding:4px 11px; cursor:pointer; }
+.btn:hover { border-color:var(--accent); }
+
+.main { display:grid; grid-template-columns:250px 1fr auto; min-height:0; }
+
+/* 左: グループ一覧 */
+aside.groups { overflow:auto; border-right:1px solid var(--line); padding:12px 14px; }
+.note { font-size:12px; color:var(--muted); background:var(--tag-bg); border-radius:6px; padding:6px 9px; margin:8px 0; }
+.grow { display:flex; align-items:center; gap:6px; margin-top:10px; }
+.grow label { display:flex; align-items:center; gap:5px; cursor:pointer; }
+.sw { width:11px; height:11px; border-radius:3px; background:var(--c); display:inline-block; }
+.link { background:none; border:0; padding:0; cursor:pointer; text-align:left; }
+.link:hover { color:var(--accent); text-decoration:underline; }
+.gname { font-weight:700; font-size:13px; }
+.cnt { font-size:11px; color:var(--muted); }
+.ai { font-size:10px; font-weight:700; color:var(--muted); border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+.gdesc { font-size:12px; color:var(--muted); margin:2px 0 0 22px; }
+
+/* 中央: 図 */
+.canvas { position:relative; overflow:hidden; min-height:0; }
+#svg { width:100%; height:100%; display:block; touch-action:none; cursor:grab; user-select:none; }
+#svg.dragging { cursor:grabbing; }
+#status { position:absolute; top:12px; left:50%; transform:translateX(-50%); background:var(--panel); border:1px solid var(--line);
+  border-radius:6px; padding:6px 12px; font-size:13px; }
+#status:empty { display:none; }
+.legend { position:absolute; left:12px; bottom:12px; background:var(--panel); border:1px solid var(--line); border-radius:6px;
+  padding:6px 10px; font-size:11.5px; color:var(--muted); max-width:calc(100% - 24px); }
+
+/* 右: 選択中テーブルの詳細 */
+aside.panel { width:380px; overflow:auto; border-left:1px solid var(--line); padding:14px 16px 40px; background:var(--panel); position:relative; }
+aside.panel[hidden] { display:none; }
+aside.panel h2 { font-size:17px; margin:4px 0 8px; word-break:break-all; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+aside.panel h3 { font-size:12px; color:var(--muted); letter-spacing:.06em; margin:18px 0 6px; }
+.close { position:absolute; top:8px; right:10px; border:0; background:none; font-size:20px; cursor:pointer; color:var(--muted); }
+.comment { white-space:pre-wrap; margin:0 0 8px; font-size:13px; }
+.detail { display:inline-block; margin:4px 0; font-weight:700; color:var(--accent); }
+table.cols { width:100%; border-collapse:collapse; font-size:12.5px; }
+table.cols td { border-bottom:1px solid var(--line); padding:5px 4px; vertical-align:top; }
+table.cols td.k { width:28px; font-size:10px; font-weight:800; color:var(--accent); }
+.cn { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; word-break:break-all; }
+.ct { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; color:var(--muted); font-size:11.5px; word-break:break-all; }
+.cc { white-space:pre-wrap; font-size:12px; margin-top:2px; }
+ul.rels { list-style:none; padding:0; margin:0; font-size:12.5px; }
+ul.rels li { padding:4px 0; border-bottom:1px solid var(--line); }
+ul.rels .link { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-weight:700; word-break:break-all; }
+ul.rels .rc { display:block; color:var(--muted); font-size:11.5px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; word-break:break-all; }
+
+/* SVG の部品 */
+#svg text { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; fill:var(--fg); }
+.grp rect { fill:var(--c); fill-opacity:.06; stroke:var(--c); stroke-opacity:.55; stroke-width:1.5; }
+#svg .grp text { fill:var(--c); font-weight:700; font-size:14px; font-family:"Hiragino Sans","Noto Sans JP",sans-serif; }
+.tbl { cursor:pointer; }
+.tbl .box { fill:var(--card); }
+.tbl .head { fill:color-mix(in srgb, var(--c) 20%, var(--card)); }
+.tbl .outline { fill:none; stroke:color-mix(in srgb, var(--c) 55%, var(--line)); stroke-width:1.2; }
+.tbl.view .outline { stroke-dasharray:5 3; }
+#svg .tbl .name { font-weight:700; font-size:13px; }
+#svg .tbl .ctype { fill:var(--muted); }
+#svg .tbl .null { fill-opacity:.75; }
+#svg .tbl .key { font-size:9px; font-weight:800; fill:var(--accent); }
+.tbl:hover .outline, .tbl.sel .outline, .tbl.match .outline { stroke:var(--accent); stroke-width:2.5; }
+.edge .link, .edge line, .edge circle { fill:none; stroke:var(--edge); stroke-width:1.3; }
+.edge circle { fill:var(--bg); }
+.edge .hit { fill:none; stroke:transparent; stroke-width:10; }
+.edge.virtual .link { stroke-dasharray:5 4; }
+.edge.on .link, .edge.on line, .edge.on circle { stroke:var(--accent); stroke-width:2.2; }
+#svg.focus .tbl:not(.on) { opacity:.18; }
+#svg.focus .edge:not(.on) { opacity:.06; }
+#svg.focus .grp { opacity:.45; }
+
+@media (max-width:860px) {
+  .main { grid-template-columns:minmax(0,1fr); grid-template-rows:auto 1fr; }
+  #search { flex:1 1 140px; min-width:0; }
+  aside.groups { max-height:28vh; border-right:0; border-bottom:1px solid var(--line); }
+  aside.panel { position:fixed; left:0; right:0; bottom:0; width:auto; max-height:55vh; border-left:0; border-top:1px solid var(--line); }
+  header.bar .tools { margin-left:0; }
+}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div>
+    <div class="eyebrow">ER DIAGRAM</div>
+    <h1 id="db-name"></h1>
+  </div>
+  <span class="desc" id="db-desc"></span>
+  <span class="stat" id="db-stat"></span>
+  <div class="tools">
+    <input id="search" type="search" placeholder="テーブル名で検索（Enter で移動）">
+    <label><input type="checkbox" id="keys-only"> キーだけ表示</label>
+    <button class="btn" id="fit">全体表示</button>
+  </div>
+</header>
+<div class="main">
+  <aside class="groups" id="groups"></aside>
+  <div class="canvas">
+    <svg id="svg"><g id="viewport"></g></svg>
+    <div id="status">レイアウトを計算中…</div>
+    <div class="legend">線の端の記号: ‖ 必ず1件 ／ ○| 0〜1件 ／ ○&lt; 0件以上 ／ |&lt; 1件以上。破線は FK 制約の無い仮想リレーション、点線の枠はビュー。ホイールで拡大縮小、ドラッグで移動、テーブルをクリックで関連を強調</div>
+  </div>
+  <aside class="panel" id="panel" hidden></aside>
+</div>
+
+<!-- データ。scripts/build.mjs が埋め込む。手で書き換えない -->
+<script type="application/json" id="schema">{{SCHEMA}}</script>
+<script type="application/json" id="meta">{{META}}</script>
+
+<script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const status = $('status');
+  const schema = JSON.parse($('schema').textContent);
+  const meta = JSON.parse($('meta').textContent);
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+  const FONT = '12px ' + MONO, FONT_B = 'bold 13px ' + MONO;
+  const ROW = 20, HEAD = 30, PADX = 10, KEYW = 24, GAP = 18, MINW = 150;
+
+  const svgEl = (tag, attrs, parent) => {
+    const e = document.createElementNS(NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const svgText = (parent, cls, x, y, s) => {
+    const e = svgEl('text', { class: cls, x, y }, parent);
+    e.textContent = s;
+    return e;
+  };
+  const h = (tag, props, ...kids) => {
+    const e = document.createElement(tag);
+    Object.assign(e, props);
+    e.append(...kids);
+    return e;
+  };
+
+  // ---- モデル ----
+  const tables = new Map();
+  for (const t of schema.tables || []) {
+    const pk = new Set((t.constraints || []).filter(c => c.type === 'PRIMARY KEY').flatMap(c => c.columns || []));
+    tables.set(t.name, {
+      name: t.name, type: t.type || '', comment: t.comment || '',
+      columns: (t.columns || []).map(c => ({
+        name: c.name, type: c.type || '', nullable: !!c.nullable, comment: c.comment || '', pk: pk.has(c.name), fk: false,
+      })),
+      parents: [], children: [], group: null, w: 0, h: 0, x: 0, y: 0, node: null,
+    });
+  }
+  const relations = (schema.relations || []).filter(r => tables.has(r.table) && tables.has(r.parent_table));
+  for (const r of relations) {
+    const child = tables.get(r.table);
+    for (const c of child.columns) if ((r.columns || []).includes(c.name)) c.fk = true;
+    child.parents.push(r);
+    tables.get(r.parent_table).children.push(r);
+  }
+
+  // テーブルは最初に現れたグループに属する。どこにも属さないものは「未分類」にまとめる
+  const groups = [];
+  for (const g of meta.groups || []) {
+    const grp = { id: String(g.id), name: g.name || String(g.id), desc: g.desc || '', source: g.source || '', tables: [], visible: true };
+    for (const n of g.tables || []) {
+      const t = tables.get(n);
+      if (t && !t.group) { t.group = grp; grp.tables.push(t); }
+    }
+    if (grp.tables.length) groups.push(grp);
+  }
+  const rest = [...tables.values()].filter(t => !t.group);
+  if (rest.length) {
+    const grp = { id: '__rest', name: '未分類', desc: '', source: '', tables: rest, visible: true };
+    rest.forEach(t => { t.group = grp; });
+    groups.push(grp);
+  }
+  groups.forEach((g, i) => { g.color = i % 8; });
+  const detailLinks = meta.detailLinks || {};
+
+  // ---- テーブルの大きさ ----
+  const ctx = document.createElement('canvas').getContext('2d');
+  const textWidth = (s, font) => { ctx.font = font; return ctx.measureText(s).width; };
+  let keysOnly = false;
+  const shownColumns = t => keysOnly ? t.columns.filter(c => c.pk || c.fk) : t.columns;
+  const measure = t => {
+    const cols = shownColumns(t);
+    let w = textWidth(t.name, FONT_B) + PADX * 2;
+    for (const c of cols) w = Math.max(w, KEYW + textWidth(c.name, FONT) + GAP + textWidth(c.type, FONT) + PADX * 2);
+    t.w = Math.ceil(Math.max(MINW, w));
+    t.h = HEAD + cols.length * ROW + (cols.length ? 6 : 0);
+  };
+
+  // ---- レイアウト（elkjs でテーブルの位置だけ決め、線は自前で引く） ----
+  let bounds = { w: 0, h: 0 };
+  async function layout() {
+    const visible = groups.filter(g => g.visible);
+    const shown = new Set(visible.flatMap(g => g.tables.map(t => t.name)));
+    const byId = new Map();
+    const graph = {
+      id: 'root',
+      layoutOptions: {
+        'elk.algorithm': 'layered',
+        'elk.direction': 'RIGHT',
+        'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
+        'elk.spacing.nodeNode': '28',
+        'elk.layered.spacing.nodeNodeBetweenLayers': '70',
+        'elk.spacing.componentComponent': '48',
+        'elk.padding': '[top=24,left=24,bottom=24,right=24]',
+      },
+      children: visible.map((g, gi) => {
+        byId.set('g' + gi, g);
+        return {
+          id: 'g' + gi,
+          layoutOptions: { 'elk.padding': '[top=42,left=18,bottom=18,right=18]' },
+          children: g.tables.map((t, ti) => {
+            measure(t);
+            const id = 'g' + gi + 't' + ti;
+            byId.set(id, t);
+            t.elkId = id;
+            return { id, width: t.w, height: t.h };
+          }),
+        };
+      }),
+      edges: [],
+    };
+    relations.forEach((r, i) => {
+      if (r.table === r.parent_table || !shown.has(r.table) || !shown.has(r.parent_table)) return;
+      graph.edges.push({ id: 'e' + i, sources: [tables.get(r.parent_table).elkId], targets: [tables.get(r.table).elkId] });
+    });
+
+    const res = await new ELK().layout(graph);
+    bounds = { w: res.width, h: res.height };
+    for (const gn of res.children) {
+      const g = byId.get(gn.id);
+      Object.assign(g, { x: gn.x, y: gn.y, w: gn.width, h: gn.height });
+      for (const tn of gn.children || []) Object.assign(byId.get(tn.id), { x: gn.x + tn.x, y: gn.y + tn.y });
+    }
+    render(visible, shown);
+  }
+
+  // ---- 描画 ----
+  const svg = $('svg'), view = $('viewport');
+  let selected = null;
+
+  function render(visible, shown) {
+    for (const t of tables.values()) t.node = null;
+    for (const r of relations) r.node = null;
+    view.replaceChildren();
+    const groupLayer = svgEl('g', {}, view), edgeLayer = svgEl('g', {}, view), tableLayer = svgEl('g', {}, view);
+    for (const g of visible) {
+      const gg = svgEl('g', { class: 'grp c' + g.color }, groupLayer);
+      svgEl('rect', { x: g.x, y: g.y, width: g.w, height: g.h, rx: 12 }, gg);
+      svgText(gg, '', g.x + 16, g.y + 26, g.name);
+    }
+    for (const r of relations) if (shown.has(r.table) && shown.has(r.parent_table)) drawEdge(r, edgeLayer);
+    for (const g of visible) for (const t of g.tables) drawTable(t, tableLayer);
+    applySelection();
+    applySearch();
+  }
+
+  function drawTable(t, layer) {
+    const g = svgEl('g', { class: 'tbl c' + t.group.color + (/VIEW/i.test(t.type) ? ' view' : ''), transform: `translate(${t.x},${t.y})` }, layer);
+    t.node = g;
+    svgEl('rect', { class: 'box', width: t.w, height: t.h, rx: 6 }, g);
+    svgEl('path', { class: 'head', d: `M0,${HEAD} V6 A6,6 0 0 1 6,0 H${t.w - 6} A6,6 0 0 1 ${t.w},6 V${HEAD} Z` }, g);
+    svgEl('rect', { class: 'outline', width: t.w, height: t.h, rx: 6 }, g);
+    svgText(g, 'name', PADX, 20, t.name);
+    shownColumns(t).forEach((c, i) => {
+      const y = HEAD + i * ROW + 15;
+      if (c.pk || c.fk) svgText(g, 'key', PADX, y - 1, c.pk && c.fk ? 'PF' : c.pk ? 'PK' : 'FK');
+      svgText(g, 'col' + (c.nullable ? ' null' : ''), PADX + KEYW, y, c.name);
+      svgText(g, 'ctype', t.w - PADX, y, c.type).setAttribute('text-anchor', 'end');
+    });
+    svgEl('title', {}, g).textContent = t.comment ? `${t.name}\n${t.comment}` : t.name;
+    g.addEventListener('click', ev => {
+      ev.stopPropagation();
+      if (!dragMoved) select(t.name);
+    });
+  }
+
+  // 線をつなぐ高さ。カラムが表示されていなければヘッダーの高さにする
+  const anchorY = (t, cols) => {
+    const i = shownColumns(t).findIndex(c => (cols || []).includes(c.name));
+    return i < 0 ? HEAD / 2 : HEAD + i * ROW + ROW / 2;
+  };
+
+  function drawEdge(r, layer) {
+    const c = tables.get(r.table), p = tables.get(r.parent_table);
+    const g = svgEl('g', { class: 'edge' + (r.virtual ? ' virtual' : '') }, layer);
+    r.node = g;
+    const y1 = p.y + anchorY(p, r.parent_columns), y2 = c.y + anchorY(c, r.columns);
+    let x1, x2, d1, d2;
+    if (c !== p && c.x >= p.x + p.w) { x1 = p.x + p.w; d1 = 1; x2 = c.x; d2 = -1; }
+    else if (c !== p && c.x + c.w <= p.x) { x1 = p.x; d1 = -1; x2 = c.x + c.w; d2 = 1; }
+    else { x1 = p.x + p.w; d1 = 1; x2 = c.x + c.w; d2 = 1; }
+    const bend = Math.max(40, Math.abs(x2 - x1) / 2);
+    const d = `M${x1},${y1} C${x1 + d1 * bend},${y1} ${x2 + d2 * bend},${y2} ${x2},${y2}`;
+    svgEl('path', { class: 'hit', d }, g);
+    svgEl('path', { class: 'link', d }, g);
+    endMarker(g, x1, y1, d1, r.parent_cardinality);
+    endMarker(g, x2, y2, d2, r.cardinality);
+    svgEl('title', {}, g).textContent =
+      `${r.table} (${(r.columns || []).join(', ')}) → ${r.parent_table} (${(r.parent_columns || []).join(', ')})` + (r.def ? `\n${r.def}` : '');
+  }
+
+  // カーディナリティの記号（IE 記法）。dir は箱から線が出ていく向き
+  function endMarker(g, x, y, dir, card) {
+    const bar = d => svgEl('line', { x1: x + dir * d, y1: y - 6, x2: x + dir * d, y2: y + 6 }, g);
+    const circle = d => svgEl('circle', { cx: x + dir * d, cy: y, r: 4 }, g);
+    const crow = () => {
+      svgEl('line', { x1: x, y1: y - 6, x2: x + dir * 10, y2: y }, g);
+      svgEl('line', { x1: x, y1: y + 6, x2: x + dir * 10, y2: y }, g);
+    };
+    if (card === 'exactly_one') { bar(6); bar(11); }
+    else if (card === 'zero_or_one') { bar(6); circle(15); }
+    else if (card === 'one_or_more') { crow(); bar(14); }
+    else if (card === 'zero_or_more') { crow(); circle(15); }
+  }
+
+  // ---- 選択と強調 ----
+  function select(name) {
+    selected = name;
+    applySelection();
+    renderPanel();
+  }
+
+  function applySelection() {
+    svg.classList.toggle('focus', !!selected);
+    const on = new Set();
+    if (selected) {
+      const t = tables.get(selected);
+      on.add(t.name);
+      t.parents.forEach(r => on.add(r.parent_table));
+      t.children.forEach(r => on.add(r.table));
+    }
+    for (const t of tables.values()) {
+      if (!t.node) continue;
+      t.node.classList.toggle('on', on.has(t.name));
+      t.node.classList.toggle('sel', t.name === selected);
+    }
+    for (const r of relations) {
+      if (r.node) r.node.classList.toggle('on', !!selected && (r.table === selected || r.parent_table === selected));
+    }
+  }
+
+  function renderPanel() {
+    const panel = $('panel');
+    if (!selected) { panel.hidden = true; return; }
+    const t = tables.get(selected);
+    const kids = [
+      h('button', { className: 'close', textContent: '×', title: '閉じる', onclick: () => select(null) }),
+      h('div', { className: 'eyebrow', textContent: t.group.name + (t.type ? ' ・ ' + t.type : '') }),
+      h('h2', { textContent: t.name }),
+    ];
+    if (t.comment) kids.push(h('p', { className: 'comment', textContent: t.comment }));
+    if (detailLinks[t.name]) kids.push(h('a', { className: 'detail', href: detailLinks[t.name], textContent: 'このテーブルの解説を開く →' }));
+
+    const body = h('tbody', {});
+    for (const c of t.columns) {
+      const info = h('td', {},
+        h('div', { className: 'cn', textContent: c.name }),
+        h('div', { className: 'ct', textContent: c.type + (c.nullable ? '' : ' NOT NULL') }));
+      if (c.comment) info.append(h('div', { className: 'cc', textContent: c.comment }));
+      body.append(h('tr', {}, h('td', { className: 'k', textContent: c.pk && c.fk ? 'PF' : c.pk ? 'PK' : c.fk ? 'FK' : '' }), info));
+    }
+    kids.push(h('h3', { textContent: `カラム（${t.columns.length}）` }), h('table', { className: 'cols' }, body));
+
+    const relationList = (title, rs, other) => {
+      if (!rs.length) return;
+      const ul = h('ul', { className: 'rels' });
+      for (const r of rs) {
+        const target = other(r);
+        ul.append(h('li', {},
+          h('button', { className: 'link', textContent: target, onclick: () => focusTable(target) }),
+          h('span', { className: 'rc', textContent: `${(r.columns || []).join(', ')} → ${(r.parent_columns || []).join(', ')}${r.virtual ? '（仮想）' : ''}` })));
+      }
+      kids.push(h('h3', { textContent: title }), ul);
+    };
+    relationList('親テーブル（このテーブルが参照する）', t.parents, r => r.parent_table);
+    relationList('子テーブル（このテーブルを参照する）', t.children, r => r.table);
+
+    panel.replaceChildren(...kids);
+    panel.hidden = false;
+  }
+
+  // ---- パンとズーム ----
+  let tx = 0, ty = 0, k = 1;
+  const applyTransform = () => view.setAttribute('transform', `translate(${tx},${ty}) scale(${k})`);
+  function fitTo(x, y, w, hh, maxK) {
+    const r = svg.getBoundingClientRect();
+    k = Math.min(maxK, (r.width - 40) / w, (r.height - 40) / hh);
+    if (!(k > 0)) k = 1;
+    tx = (r.width - w * k) / 2 - x * k;
+    ty = (r.height - hh * k) / 2 - y * k;
+    applyTransform();
+  }
+  function centerOn(t) {
+    const r = svg.getBoundingClientRect();
+    k = Math.max(k, 0.8);
+    tx = r.width / 2 - (t.x + t.w / 2) * k;
+    ty = r.height / 2 - (t.y + t.h / 2) * k;
+    applyTransform();
+  }
+  async function focusTable(name) {
+    const t = tables.get(name);
+    if (!t.group.visible) {
+      t.group.visible = true;
+      renderGroups();
+      await relayout();
+    }
+    select(name);
+    centerOn(t);
+  }
+
+  svg.addEventListener('wheel', ev => {
+    ev.preventDefault();
+    const r = svg.getBoundingClientRect();
+    const px = ev.clientX - r.left, py = ev.clientY - r.top;
+    const nk = Math.min(4, Math.max(0.05, k * Math.exp(-ev.deltaY * 0.0015)));
+    tx = px - (px - tx) * nk / k;
+    ty = py - (py - ty) * nk / k;
+    k = nk;
+    applyTransform();
+  }, { passive: false });
+
+  // setPointerCapture は使わない。click の発生先が svg に変わり、テーブルのクリックを拾えなくなるため
+  let drag = null, dragMoved = false;
+  svg.addEventListener('pointerdown', ev => {
+    if (ev.button !== 0) return;
+    drag = { x: ev.clientX, y: ev.clientY, tx, ty };
+    dragMoved = false;
+    svg.classList.add('dragging');
+  });
+  window.addEventListener('pointermove', ev => {
+    if (!drag) return;
+    const dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 4) dragMoved = true;
+    tx = drag.tx + dx;
+    ty = drag.ty + dy;
+    applyTransform();
+  });
+  window.addEventListener('pointerup', () => { drag = null; svg.classList.remove('dragging'); });
+  svg.addEventListener('click', () => { if (!dragMoved) select(null); });
+
+  // ---- 左のグループ一覧と上部の操作 ----
+  function renderGroups() {
+    const kids = [h('div', { className: 'eyebrow', textContent: 'グループ' })];
+    if (groups.some(g => g.source === 'ai')) {
+      kids.push(h('p', { className: 'note', textContent: '「AI」印のグループは、AI がテーブル名・外部キー・コメントから推定した分類' }));
+    }
+    for (const g of groups) {
+      const cb = h('input', { type: 'checkbox', checked: g.visible });
+      cb.addEventListener('change', () => { g.visible = cb.checked; relayout(); });
+      const row = h('div', { className: 'grow c' + g.color },
+        h('label', { title: '表示/非表示' }, cb, h('span', { className: 'sw' })),
+        h('button', { className: 'link gname', textContent: g.name, onclick: () => focusGroup(g) }),
+        h('span', { className: 'cnt', textContent: String(g.tables.length) }));
+      if (g.source === 'ai') row.append(h('span', { className: 'ai', textContent: 'AI', title: 'AI による分類' }));
+      kids.push(row);
+      if (g.desc) kids.push(h('p', { className: 'gdesc', textContent: g.desc }));
+    }
+    $('groups').replaceChildren(...kids);
+  }
+  async function focusGroup(g) {
+    if (!g.visible) {
+      g.visible = true;
+      renderGroups();
+      await relayout();
+    }
+    fitTo(g.x, g.y, g.w, g.h, 1.2);
+  }
+
+  const searchBox = $('search');
+  const query = () => searchBox.value.trim().toLowerCase();
+  function applySearch() {
+    const q = query();
+    for (const t of tables.values()) if (t.node) t.node.classList.toggle('match', !!q && t.name.toLowerCase().includes(q));
+  }
+  searchBox.addEventListener('input', applySearch);
+  searchBox.addEventListener('keydown', ev => {
+    if (ev.key !== 'Enter' || !query()) return;
+    const hit = [...tables.values()].find(t => t.name.toLowerCase().includes(query()));
+    if (hit) focusTable(hit.name);
+  });
+  $('keys-only').addEventListener('change', ev => { keysOnly = ev.target.checked; relayout(); });
+  $('fit').addEventListener('click', () => fitTo(0, 0, bounds.w, bounds.h, 1.2));
+
+  async function relayout() {
+    status.textContent = 'レイアウトを計算中…';
+    try {
+      await layout();
+      status.textContent = '';
+      document.body.dataset.erReady = '1';
+    } catch (e) {
+      status.textContent = 'レイアウトに失敗した: ' + e.message;
+    }
+  }
+
+  // ---- 開始 ----
+  $('db-name').textContent = schema.name || '';
+  $('db-desc').textContent = schema.desc || '';
+  $('db-stat').textContent = `テーブル ${tables.size} ・ リレーション ${relations.length}`;
+  renderGroups();
+  if (typeof ELK === 'undefined') {
+    status.textContent = 'elkjs を読み込めない。ブラウザが cdn.jsdelivr.net に繋がっているか確認する';
+    return;
+  }
+  relayout().then(() => fitTo(0, 0, bounds.w, bounds.h, 1.2));
+})();
+</script>
+</body>
+</html>
