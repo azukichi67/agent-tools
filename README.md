@@ -47,4 +47,8 @@ Issue から PR までの流れ:
 単独で使うもの:
 
 - `explain-visually`: 長い文書や PR を、図付きの解説 HTML にする
+- DB 定義の理解（入力は tbls の出力）:
+  - `create-er`: ドメインごとにまとめたインタラクティブな ER 図の HTML を作る
+  - `explain-table`: 1テーブルの役割とデータの動きを、アプリのソースを根拠に解説する HTML を作る
+  - `explain-db`: 上の2つを使い、DB 全体の解説資料一式（索引・ER 図・テーブルごとのページ）を作る
 - `create-pr`, `pr-review-loop`, `plan-review-loop`: 上の流れの外でも使える
