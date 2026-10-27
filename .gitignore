@@ -1,1 +1,4 @@
 .env
+
+# 上流（musoukun/skills）にライセンスがないため git 管理外
+.claude/skills/animated-arch-diagram/
