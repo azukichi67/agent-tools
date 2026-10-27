@@ -36,7 +36,7 @@ Issue から PR までの流れ:
 1. `requirements-definition`: 要件を決める
 2. `grill-issue`: Issue に実装計画の材料を書き足す
 3. `plan-issue`: 実装計画を作る（`plan-review-loop` と `explain-visually` を使う）
-4. `implement-plan`: 計画どおりに実装し、PR を作る（`create-pr` と `pr-review-loop` を使う）
+4. `implement-plan`: 計画どおりに実装し、PR を作る（`create-commit`・`create-pr`・`pr-review-loop` を使う）
 
 実装中や計画中に参照するもの:
 
@@ -51,4 +51,4 @@ Issue から PR までの流れ:
   - `create-er`: ドメインごとにまとめたインタラクティブな ER 図の HTML を作る
   - `explain-table`: 1テーブルの役割とデータの動きを、アプリのソースを根拠に解説する HTML を作る
   - `explain-db`: 上の2つを使い、DB 全体の解説資料一式（索引・ER 図・テーブルごとのページ）を作る
-- `create-pr`, `pr-review-loop`, `plan-review-loop`: 上の流れの外でも使える
+- `create-commit`, `create-pr`, `pr-review-loop`, `plan-review-loop`: 上の流れの外でも使える

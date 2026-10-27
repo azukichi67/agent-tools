@@ -17,7 +17,7 @@ disable-model-invocation: true
 4. 実装計画に書かれた品質管理の手順（テスト・lint・型チェック等）を実行し、通ることを確認する。
 5. 実装について、自分でレビューと改善を3回繰り返す。各回で、実装計画との差異と、品質管理の手順が通ることを確認する。
 6. main にいる場合は、作業ブランチ `<種別>/<Issue番号>-<内容の英語要約>`（例: `feat/14-create-place`）を切る。Issue番号は実装計画のファイル名（`issue<番号>-`）から取り、種別は Issue の label から決める（`feature` → `feat`、`bug` → `fix`、`chore` → `chore`）。
-7. 変更をコミットする。コミットメッセージは `code-comments` Skill に従う。
+7. Skill tool で `create-commit` を呼び出し、変更をコミットする。
 8. Skill tool で `create-pr` を呼び出し、PR を作成する。
 9. `git rev-parse HEAD` でループ開始時のコミットを控えてから、Skill tool で `pr-review-loop` を呼び出し、args に PR の URL を渡してレビューループを回す。
 10. `git rev-parse HEAD` が手順9で控えたコミットから変わっていれば（レビューでコードが変わった）、PR の本文と撮影を作り直す。変わっていなければ、この手順は飛ばす。
