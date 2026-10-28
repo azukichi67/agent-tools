@@ -17,6 +17,7 @@ Python 3.9+ / 標準ライブラリのみで動作する（git / gh は外部コ
 """
 
 import argparse
+import glob
 import hashlib
 import json
 import os
@@ -80,7 +81,7 @@ DEFAULT_CONFIG = {
     "requireHumanOnNewHighSeverity": True,
     "perspectives": {
         "correctness": "変更されたコードにバグ・論理誤り・境界条件の見落としがないか",
-        "spec_mismatch": "PR説明文とリンクされたIssue等の要件に対して、実装内容が一致しているか",
+        "spec_mismatch": "PR説明文・リンクされたIssue等・実装計画・要件定義書の要件に対して、実装内容が一致しているか",
         "security": "セキュリティ上の問題（入力検証漏れ、権限チェック漏れ、秘密情報の露出等）がないか",
         "tests": "変更内容に対するテストが不足・欠落していないか、既存テストが誤って変更されていないか",
         "performance": "パフォーマンス上の懸念（N+1、不要なループ、大量データでの劣化等）がないか",
@@ -328,6 +329,28 @@ def extract_web_urls(text):
 
 
 # ---------------------------------------------------------------------------
+# 必読文書（実装計画・要件定義書）の検出
+# ---------------------------------------------------------------------------
+
+def find_required_docs(repo_root, issue_numbers):
+    """Issueに紐づく実装計画書（plan-issue）と要件定義書（requirements-definition）を探す。
+
+    戻り値は repo_root からの相対パス。issue<N>-pr<M>-… の分割計画も全て含める。
+    """
+    root = glob.escape(repo_root)
+    docs = []
+    for n in sorted(issue_numbers):
+        patterns = [
+            os.path.join(root, "docs", "design-for-ai", "issue{}-*-implementation-plan.md".format(n)),
+            os.path.join(root, "docs", "requirements", "issue{}-*".format(n), "requirements.md"),
+        ]
+        for pattern in patterns:
+            for path in sorted(glob.glob(pattern)):
+                docs.append(os.path.relpath(path, repo_root).replace(os.sep, "/"))
+    return docs
+
+
+# ---------------------------------------------------------------------------
 # プロンプト生成
 # ---------------------------------------------------------------------------
 
@@ -402,6 +425,27 @@ def required_links_section(state):
     return "\n".join(lines) + "\n"
 
 
+def required_docs_section(state):
+    docs = state.get("requiredDocs") or []
+    if not docs:
+        return ""
+    lines = [
+        "## 必ず確認する文書（実装計画・要件定義）",
+        "",
+        "以下はこのPRに紐づくIssueの実装計画と要件定義で、このPRの実装が従うべきものです。"
+        "実装との食い違いは spec_mismatch として指摘してください。",
+        "",
+    ]
+    for path in docs:
+        lines += [
+            "### {}".format(path),
+            "",
+            read_file(os.path.join(state["repoRoot"], path), "必読文書"),
+            "",
+        ]
+    return "\n".join(lines) + "\n"
+
+
 def reference_links_section(state):
     refs = state["referenceLinks"]
     if not refs:
@@ -471,7 +515,8 @@ def finding_criteria_section():
         "",
         "- 動作・セキュリティ・パフォーマンスの問題: 失敗シナリオ"
         "（どの入力・状態・操作で、何がどう壊れる・劣化するか）",
-        "- 要件との不一致: PR説明文・リンクされたIssue等のどの記述と、実装のどこが食い違うか",
+        "- 要件との不一致: PR説明文・リンクされたIssue等・実装計画・要件定義書のどの記述と、"
+        "実装のどこが食い違うか",
         "- テストの不足: 変更された動作のうち、プロジェクトの既存のテスト慣習に照らして"
         "テストされるべきなのにテストが無いのはどこか（既存テストの誤った変更を含む）",
         "- コード品質: 変更されたコードのどこが、プロジェクトのどの規約・慣習・既存実装の"
@@ -510,6 +555,7 @@ def build_initial_prompt(state, changes_summary=None):
         "",
         pr_header_section(state),
         required_links_section(state),
+        required_docs_section(state),
         reference_links_section(state),
         "## 変更ファイル一覧（git diff --stat）",
         "",
@@ -557,7 +603,7 @@ def build_rereview_prompt(state, changes_summary):
         "2. 前回と同じ観点でレビューし、残存する指摘があれば出力してください。",
         "3. 修正により解消された指摘は含めないでください。",
         "4. 新たに気づいた指摘があれば追加してください。",
-        "5. 必読リンクの内容を前回のセッションで確認済みの場合、再取得は不要ですが、"
+        "5. 必読リンク・必読文書の内容を前回のセッションで確認済みの場合、再取得は不要ですが、"
         "要件との照合は改めて行ってください。",
         "",
         gh_instruction(state["backend"]),
@@ -571,8 +617,8 @@ def build_feedback_prompt(state, findings, feedback_text, fresh_session=False):
     """フィードバック反映用のプロンプト。
 
     fresh_session=True はresumeに失敗して新規セッションになったとき用。
-    新規セッションのレビュアーは必読リンクを読んだ記憶が無いため、
-    必読リンク・参考リンクの節を含める。
+    新規セッションのレビュアーは必読リンク・必読文書を読んだ記憶が無いため、
+    必読リンク・必読文書・参考リンクの節を含める。
     """
     listed = []
     for f in findings:
@@ -587,6 +633,7 @@ def build_feedback_prompt(state, findings, feedback_text, fresh_session=False):
     if fresh_session:
         parts += [
             required_links_section(state),
+            required_docs_section(state),
             reference_links_section(state),
             finding_criteria_section(),
         ]
@@ -1291,6 +1338,13 @@ def cmd_start(args):
     reference_links = [l["url"] for l in comment_links] + extract_web_urls(body + "\n" + comment_bodies)
     needs_figma = bool(re.search(r"https?://(?:www\.)?figma\.com/", body + "\n" + comment_bodies))
 
+    # 必読文書: 必読Issueと、ブランチ名（implement-plan の命名規約 <種別>/<Issue番号>-…）のIssue
+    doc_issue_numbers = {l["number"] for l in required if l["repo"].lower() == self_repo.lower()}
+    branch_issue = re.match(r"^[a-z]+/([0-9]+)-", pr["headRefName"])
+    if branch_issue:
+        doc_issue_numbers.add(int(branch_issue.group(1)))
+    required_docs = find_required_docs(repo_root, doc_issue_numbers)
+
     run_dir = tempfile.mkdtemp(prefix="pr-review-")
     schema_path = os.path.join(run_dir, "findings-schema.json")
     with open(schema_path, "w", encoding="utf-8") as f:
@@ -1311,6 +1365,7 @@ def cmd_start(args):
             "headRefOid": pr["headRefOid"],
         },
         "requiredLinks": required,
+        "requiredDocs": required_docs,
         "referenceLinks": reference_links,
         "needsFigma": needs_figma,
         "config": config,
@@ -1335,6 +1390,7 @@ def cmd_start(args):
         "requiredLinks": [
             {"url": l["url"], "title": l["title"], "source": l["source"]} for l in required
         ],
+        "requiredDocs": required_docs,
         "referenceLinkCount": len(reference_links),
         "configSource": config.pop("_configPath", "defaults"),
         "maxRounds": config["maxRounds"],
@@ -1402,6 +1458,7 @@ def cmd_status(args):
         "pr": {"url": state["pr"]["url"], "title": state["pr"]["title"],
                "baseRef": state["pr"]["baseRef"]},
         "requiredLinks": [l["url"] for l in state["requiredLinks"]],
+        "requiredDocs": state.get("requiredDocs") or [],
         "currentRound": state["currentRound"],
         "rounds": state["rounds"],
         "waivers": state["waivers"],

@@ -45,6 +45,7 @@ python3 <スキルディレクトリ>/scripts/pr_review.py start --backend claud
 
 - 出力されるJSONの `runDir` を控え、以後のコマンドで使う
 - `requiredLinks` に、PR本文とGitHubの「Development」欄から収集した必読リンク（Issue等）が列挙される。ユーザーが指定した関連Issueがここに含まれていない場合は、レビュー前にユーザーに報告する
+- `requiredDocs` に、PRに紐づくIssueの実装計画書・要件定義書が列挙される。ユーザーが想定する文書がここに含まれていない場合は、レビュー前にユーザーに報告する
 - `warnings` が空でない場合は内容をユーザーに伝える
 - ブランチ不一致・作業ツリーの汚れ・リポジトリ不一致はここでエラーになる。エラーメッセージの指示に従って解消する
 
@@ -113,6 +114,7 @@ python3 <スキルディレクトリ>/scripts/pr_review.py feedback --run "<runD
 ## 必読リンクの扱い
 
 - 必読: PR本文中のIssue/PR/Discussionへの参照（URL・`#123`・`owner/repo#123`）と、GitHubの「Development」欄にリンクされたIssue。未確認だった場合の扱いは手順4のとおり
+- 必読文書: 必読リンクのIssueと、ブランチ名（`<種別>/<Issue番号>-…`）のIssueについて、`docs/design-for-ai/issue<番号>-*-implementation-plan.md`（実装計画書）と `docs/requirements/issue<番号>-*/requirements.md`（要件定義書）。全文をプロンプトに埋め込むため、エビデンス検証の対象外
 - 参考（確認は任意）: PRコメント中のリンクと、GitHub以外のURL（Webドキュメント等）。ただし figma.com のURLは必須情報源として扱われる（未参照だと `requiredEvidenceMet` が `false` になる）
 - 確認実績は、レビュアーのセッションが継続している間はラウンドをまたいで引き継がれる（前のラウンドで確認済みのリンクを2回目以降のレビューで再確認しなくても `requiredEvidenceMet` は `false` にならない）。セッションの再開に失敗して新規セッションになったラウンドでは、レビュアーに前回の記憶が無いため引き継がれず、改めて確認が必要になる
 - 検証は「レビュアーが gh コマンド等でそのリンクに言及したか」の機械検出であり、内容を深く読んだことまでは保証しない
