@@ -41,6 +41,7 @@ Issue から PR までの流れ:
 実装中や計画中に参照するもの:
 
 - 設計: `code-design`, `code-naming`
+- 画面: `ui-design`
 - 情報の置き場所（コード・テスト・コミットログ・コメント）: `code-comments`
 - テスト: `test-layering`, `unit-test-plan`, `e2e-test-plan`
 
