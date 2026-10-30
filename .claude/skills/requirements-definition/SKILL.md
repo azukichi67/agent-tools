@@ -43,6 +43,8 @@ metadata:
 
 [template.html](template.html) を複製し、[requirements-html.md](requirements-html.md) に従って埋める。文章化はまだしない。
 
+画面の作りは `ui-design` Skill（`.claude/skills/ui-design/SKILL.md`）に従う。
+
 完了条件: Issue で変わる画面（画面が変わらない Issue なら決定事項）がすべて1ページに並び、`{{` が残っていない。
 
 ### 4. 画面を見ながら決める
