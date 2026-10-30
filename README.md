@@ -51,4 +51,5 @@ Issue から PR までの流れ:
   - `create-er`: ドメインごとにまとめたインタラクティブな ER 図の HTML を作る
   - `explain-table`: 1テーブルの役割とデータの動きを、アプリのソースを根拠に解説する HTML を作る
   - `explain-db`: 上の2つを使い、DB 全体の解説資料一式（索引・ER 図・テーブルごとのページ）を作る
+- `create-skill`: スキルを作る・見直す
 - `create-commit`, `create-pr`, `pr-review-loop`, `plan-review-loop`: 上の流れの外でも使える
