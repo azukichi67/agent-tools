@@ -46,6 +46,8 @@ Issue には要件が言語化済みで、解決に必要な情報は Issue 内�
 
 Skill の実体はどちらも `.claude/skills/<skill名>/SKILL.md` にあります。Skill を自動発見できない環境の場合は、このパスのファイルを直接読んでください。
 
+業務の関心事からドメインオブジェクトを見つけ、業務ロジックをドメインモデルとアプリケーション層（サービスクラス）のどちらに置くかを決める際は、先に `domain-model` Skill を読み込み、その内容に従ってください。実体は `.claude/skills/domain-model/SKILL.md` にあります。
+
 設計（責務の分割、データの持ち方、条件分岐、依存関係）を決める際は、先に `code-design` Skill を読み込み、その内容に従ってください。実体は `.claude/skills/code-design/SKILL.md` にあります。
 
 テスト方針を決める前に、`test-layering` Skill を読み込み、その内容に従って不具合の種類ごとに検出するレイヤーを割り当ててください。実体は `.claude/skills/test-layering/SKILL.md` にあります。
